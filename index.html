@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>360点评填写</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #667085;
+      --line: #d0d5dd;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #d92d20;
+      --ok: #047857;
+      --soft: #eef4ff;
+      --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 260px);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 18px 72px;
+    }
+
+    header {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 820px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .notice {
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+      border: 1px solid #bfdbfe;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: var(--shadow);
+    }
+
+    .notice strong {
+      color: #1e3a8a;
+    }
+
+    .notice ol {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.8;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      margin: 18px 0;
+      padding: 14px;
+      border: 1px solid rgba(208, 213, 221, 0.8);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .top-message {
+      font-weight: 700;
+    }
+
+    .top-message.error {
+      color: var(--danger);
+    }
+
+    .top-message.ok {
+      color: var(--ok);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: #1e40af;
+      font-weight: 600;
+    }
+
+    button {
+      min-height: 42px;
+      border: 0;
+      border-radius: 12px;
+      padding: 0 16px;
+      background: var(--primary);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.16s ease;
+    }
+
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background: #f9fafb;
+    }
+
+    .review-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .review-card {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .card-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .person {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .rating-choice {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    label.choice {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      min-height: 36px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .fields {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 140px repeat(3, minmax(0, 1fr));
+    }
+
+    .self-review {
+      display: grid;
+      gap: 14px;
+      margin: 18px 0;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .self-review h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .self-fields {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .self-fields .field:first-child,
+    .self-fields .field.full {
+      grid-column: 1 / -1;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 82px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    input:disabled {
+      background: #f2f4f7;
+      color: #98a2b3;
+    }
+
+    .output-wrap {
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .output-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .output-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    #message {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #message.error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    #message.ok {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    pre {
+      min-height: 240px;
+      max-height: 560px;
+      overflow: auto;
+      margin: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #101828;
+      color: #f9fafb;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 760px) {
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .fields {
+        grid-template-columns: 1fr;
+      }
+
+      .self-fields {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>360点评填写</h1>
+      <section class="notice">
+        <strong>填写规则</strong>
+        <ol>
+          <li>Q2已经结束了，也请我们总结自己，调整好心态再出发 ^_^；</li>
+          <li>请选择您确实了解工作输出的强相关方（至少5位）进行评分，当然不进行评分也请不吝"点赞和建议"；</li>
+          <li>填写完毕后请复制结果手动在飞书上发送给江佳泽；</li>
+        </ol>
+      </section>
+    </header>
+
+    <section class="self-review" aria-label="填写人季度回顾">
+      <h2>填写人和季度回顾</h2>
+      <div class="self-fields">
+        <div class="field">
+          <label for="reviewerName">姓名</label>
+          <input id="reviewerName" type="text" placeholder="请填写你的姓名" required>
+        </div>
+        <div class="field full">
+          <label for="workOutcome">工作成效（5~6月）</label>
+          <textarea id="workOutcome" placeholder="请填写主要工作成效" required></textarea>
+        </div>
+        <div class="field">
+          <label for="workIssue">不足或失误（5~6月）</label>
+          <textarea id="workIssue" placeholder="请填写不足、失误或复盘" required></textarea>
+        </div>
+        <div class="field">
+          <label for="julyGoal">7月的工作目标</label>
+          <textarea id="julyGoal" placeholder="请填写7月工作目标" required></textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="操作栏">
+      <div class="status">
+        <span class="pill" id="ratedCount">已评分 0 / 至少 5</span>
+        <span class="pill" id="selectedCount">已选择 0 人</span>
+        <span>名单共 <span id="totalCount">0</span> 人</span>
+        <span class="top-message" id="topMessage" aria-live="polite"></span>
+      </div>
+      <button class="secondary" type="button" id="clearBtn">清空内容</button>
+      <button type="button" id="copyBtn">生成并复制（飞书发送给江佳泽）</button>
+    </section>
+
+    <section class="review-list" id="reviewList"></section>
+
+    <section class="output-wrap">
+      <div class="output-head">
+        <h2>复制内容预览</h2>
+        <span id="message">内容会随填写自动更新。</span>
+      </div>
+      <pre id="output"></pre>
+    </section>
+  </main>
+
+  <script>
+    const people = [
+      "陈保定", "陈佳臻", "郭汝晖", "黄宇钧", "廖壮滨", "刘福深", "刘艺", "蒙涛",
+      "唐凯", "王帅", "王重彬", "郑添智", "常铖铖", "黄国强", "黄林", "谭婷婷",
+      "文星", "周俊杰", "刘胜", "周世红", "潘继伟", "米悦", "郑立平"
+    ];
+
+    const reviewList = document.querySelector("#reviewList");
+    const output = document.querySelector("#output");
+    const ratedCount = document.querySelector("#ratedCount");
+    const selectedCount = document.querySelector("#selectedCount");
+    const totalCount = document.querySelector("#totalCount");
+    const message = document.querySelector("#message");
+    const topMessage = document.querySelector("#topMessage");
+    const copyBtn = document.querySelector("#copyBtn");
+    const clearBtn = document.querySelector("#clearBtn");
+    const reviewerName = document.querySelector("#reviewerName");
+    const workOutcome = document.querySelector("#workOutcome");
+    const workIssue = document.querySelector("#workIssue");
+    const julyGoal = document.querySelector("#julyGoal");
+    const storageKey = "peer-review-360-draft-v4";
+
+    totalCount.textContent = people.length;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function getDraft() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || "{}");
+      } catch {
+        return {};
+      }
+    }
+
+    function collectSelfReview() {
+      return {
+        name: reviewerName.value.trim(),
+        outcome: workOutcome.value.trim(),
+        issue: workIssue.value.trim(),
+        julyGoal: julyGoal.value.trim()
+      };
+    }
+
+    function restoreSelfReview() {
+      const self = getDraft().__self || {};
+      reviewerName.value = self.name || "";
+      workOutcome.value = self.outcome || "";
+      workIssue.value = self.issue || "";
+      julyGoal.value = self.julyGoal || "";
+    }
+
+    function saveDraft() {
+      const draft = {
+        __self: collectSelfReview()
+      };
+      people.forEach((name, index) => {
+        const id = `person-${index}`;
+        const checked = document.querySelector(`input[name="${id}-rated"]:checked`);
+        draft[name] = {
+          rated: checked ? checked.value : "",
+          score: document.querySelector(`#${id}-score`).value.trim(),
+          result: document.querySelector(`#${id}-result`).value.trim(),
+          praise: document.querySelector(`#${id}-praise`).value.trim(),
+          suggestion: document.querySelector(`#${id}-suggestion`).value.trim()
+        };
+      });
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+    }
+
+    function renderCards() {
+      const draft = getDraft();
+      reviewList.innerHTML = people.map((name, index) => {
+        const id = `person-${index}`;
+        const item = draft[name] || {};
+        const isRated = item.rated === "评分";
+        const isNotRated = item.rated === "不评分";
+        const isSelected = isRated || isNotRated;
+        return `
+          <article class="review-card">
+            <div class="card-head">
+              <div class="person">${index + 1}. ${escapeHtml(name)}</div>
+              <div class="rating-choice" role="radiogroup" aria-label="${escapeHtml(name)}是否评分">
+                <label class="choice">
+                  <input type="radio" name="${id}-rated" value="评分" ${isRated ? "checked" : ""} required>
+                  评分
+                </label>
+                <label class="choice">
+                  <input type="radio" name="${id}-rated" value="不评分" ${isNotRated ? "checked" : ""} required>
+                  不评分
+                </label>
+              </div>
+            </div>
+            <div class="fields" id="${id}-fields" ${isSelected ? "" : "hidden"}>
+              <div class="field" id="${id}-score-field" ${isRated ? "" : "hidden"}>
+                <label for="${id}-score">评分</label>
+                <input id="${id}-score" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="必填" value="${escapeHtml(item.score || "")}" ${isRated ? "required" : "disabled"}>
+              </div>
+              <div class="field">
+                <label for="${id}-result">工作成果</label>
+                <textarea id="${id}-result" placeholder="${isRated ? "必填" : ""}" ${isRated ? "required" : ""}>${escapeHtml(item.result || "")}</textarea>
+              </div>
+              <div class="field">
+                <label for="${id}-praise">点赞</label>
+                <textarea id="${id}-praise" placeholder="${isRated ? "必填" : ""}" ${isRated ? "required" : ""}>${escapeHtml(item.praise || "")}</textarea>
+              </div>
+              <div class="field">
+                <label for="${id}-suggestion">建议</label>
+                <textarea id="${id}-suggestion" placeholder="${isRated ? "必填" : ""}" ${isRated ? "required" : ""}>${escapeHtml(item.suggestion || "")}</textarea>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function collectData() {
+      return people.map((name, index) => {
+        const id = `person-${index}`;
+        const checked = document.querySelector(`input[name="${id}-rated"]:checked`);
+        return {
+          number: index + 1,
+          name,
+          rated: checked ? checked.value : "",
+          score: document.querySelector(`#${id}-score`).value.trim(),
+          result: document.querySelector(`#${id}-result`).value.trim(),
+          praise: document.querySelector(`#${id}-praise`).value.trim(),
+          suggestion: document.querySelector(`#${id}-suggestion`).value.trim()
+        };
+      });
+    }
+
+    function buildText(self, data) {
+      const selected = data.filter((item) => item.rated);
+      const selfLines = [
+        "填写人和季度回顾",
+        `姓名：${self.name}`,
+        `工作成效（5~6月）：${self.outcome}`,
+        `不足或失误（5~6月）：${self.issue}`,
+        `7月的工作目标：${self.julyGoal}`
+      ];
+
+      if (selected.length === 0) {
+        return `${selfLines.join("\n")}\n\n请选择评分或不评分后，这里会生成360点评内容。`;
+      }
+
+      const reviewText = selected.map((item) => {
+        const lines = [`${item.number}. ${item.name}`, `是否评分：${item.rated}`];
+        const hasExtra = item.result || item.praise || item.suggestion;
+        if (item.rated === "评分") {
+          lines.push(`评分：${item.score}`);
+          lines.push(`工作成果：${item.result}`);
+          lines.push(`点赞：${item.praise}`);
+          lines.push(`建议：${item.suggestion}`);
+        } else if (hasExtra) {
+          if (item.result) lines.push(`工作成果：${item.result}`);
+          if (item.praise) lines.push(`点赞：${item.praise}`);
+          if (item.suggestion) lines.push(`建议：${item.suggestion}`);
+        }
+        return lines.join("\n");
+      }).join("\n\n");
+
+      return `${selfLines.join("\n")}\n\n360点评内容\n\n${reviewText}`;
+    }
+
+    function validate(self, data) {
+      if (self.name === "") {
+        return "请先填写你的姓名。";
+      }
+      if (self.outcome === "") {
+        return "请填写工作成效（5~6月）。";
+      }
+      if (self.issue === "") {
+        return "请填写不足或失误（5~6月）。";
+      }
+      if (self.julyGoal === "") {
+        return "请填写7月的工作目标。";
+      }
+
+      const unselected = data.find((item) => item.rated === "");
+      if (unselected) {
+        return `${unselected.number}. ${unselected.name} 请选择评分或不评分。`;
+      }
+
+      const rated = data.filter((item) => item.rated === "评分");
+      if (rated.length < 5) {
+        return `请至少选择 5 位强相关方进行评分，目前已评分 ${rated.length} 位。`;
+      }
+
+      for (const item of rated) {
+        if (item.score === "") {
+          return `${item.number}. ${item.name} 已选择评分，请填写分数。`;
+        }
+        const score = Number(item.score);
+        if (!Number.isInteger(score) || score < 0 || score > 100) {
+          return `${item.number}. ${item.name} 的分数需为 0-100 的整数。`;
+        }
+        if (item.result === "") {
+          return `${item.number}. ${item.name} 已选择评分，请填写工作成果。`;
+        }
+        if (item.praise === "") {
+          return `${item.number}. ${item.name} 已选择评分，请填写点赞。`;
+        }
+        if (item.suggestion === "") {
+          return `${item.number}. ${item.name} 已选择评分，请填写建议。`;
+        }
+      }
+
+      return "";
+    }
+
+    function showMessage(text, type = "") {
+      message.textContent = text;
+      message.className = type;
+      topMessage.textContent = text;
+      topMessage.className = `top-message ${type}`.trim();
+    }
+
+    function updatePreview() {
+      const self = collectSelfReview();
+      const data = collectData();
+      const count = data.filter((item) => item.rated === "评分").length;
+      const selected = data.filter((item) => item.rated).length;
+      ratedCount.textContent = `已评分 ${count} / 至少 5`;
+      selectedCount.textContent = `已选择 ${selected} 人`;
+      output.textContent = buildText(self, data);
+      saveDraft();
+      return data;
+    }
+
+    async function copyResult() {
+      const self = collectSelfReview();
+      const data = updatePreview();
+      const error = validate(self, data);
+      if (error) {
+        showMessage(error, "error");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(output.textContent);
+        showMessage("已复制，可以直接粘贴到飞书发送给江佳泽。", "ok");
+      } catch {
+        showMessage("浏览器未允许自动复制，请手动选中下方预览内容复制。", "error");
+      }
+    }
+
+    function clearAll() {
+      if (!confirm("确认清空当前页面里已填写的内容吗？")) return;
+      localStorage.removeItem(storageKey);
+      reviewerName.value = "";
+      workOutcome.value = "";
+      workIssue.value = "";
+      julyGoal.value = "";
+      renderCards();
+      bindEvents();
+      showMessage("已清空。");
+      updatePreview();
+    }
+
+    function bindEvents() {
+      [reviewerName, workOutcome, workIssue, julyGoal].forEach((element) => {
+        if (element.dataset.bound === "true") return;
+        element.addEventListener("input", updatePreview);
+        element.dataset.bound = "true";
+      });
+
+      reviewList.querySelectorAll("input, textarea").forEach((element) => {
+        element.addEventListener("input", updatePreview);
+        element.addEventListener("change", (event) => {
+          if (event.target.type === "radio") {
+            const index = event.target.name.match(/^person-(\d+)-rated$/)[1];
+            const fields = document.querySelector(`#person-${index}-fields`);
+            const scoreField = document.querySelector(`#person-${index}-score-field`);
+            const scoreInput = document.querySelector(`#person-${index}-score`);
+            const resultInput = document.querySelector(`#person-${index}-result`);
+            const praiseInput = document.querySelector(`#person-${index}-praise`);
+            const suggestionInput = document.querySelector(`#person-${index}-suggestion`);
+            const isRated = event.target.value === "评分";
+            fields.hidden = false;
+            scoreField.hidden = !isRated;
+            scoreInput.disabled = !isRated;
+            scoreInput.required = isRated;
+            resultInput.required = isRated;
+            praiseInput.required = isRated;
+            suggestionInput.required = isRated;
+            resultInput.placeholder = isRated ? "必填" : "";
+            praiseInput.placeholder = isRated ? "必填" : "";
+            suggestionInput.placeholder = isRated ? "必填" : "";
+            if (!isRated) scoreInput.value = "";
+          }
+          updatePreview();
+        });
+      });
+    }
+
+    restoreSelfReview();
+    renderCards();
+    bindEvents();
+    updatePreview();
+    copyBtn.addEventListener("click", copyResult);
+    clearBtn.addEventListener("click", clearAll);
+  </script>
+</body>
+</html>
