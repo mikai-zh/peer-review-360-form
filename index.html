@@ -360,7 +360,7 @@
         <ol>
           <li>Q2已经结束了，也请我们总结自己，调整好心态再出发 ^_^；</li>
           <li>请选择您确实了解工作输出的强相关方（至少5位）进行评分，当然不进行评分也请不吝"点赞和建议"；</li>
-          <li>填写完毕后请复制结果手动在飞书上发送给江佳泽；</li>
+          <li>填写完毕后请复制结果手动在飞书上发送给糜凯；</li>
         </ol>
       </section>
     </header>
@@ -373,11 +373,11 @@
           <input id="reviewerName" type="text" placeholder="请填写你的姓名" required>
         </div>
         <div class="field full">
-          <label for="workOutcome">工作成效（5~6月）</label>
+          <label for="workOutcome">工作成效（1~6月）</label>
           <textarea id="workOutcome" placeholder="请填写主要工作成效" required></textarea>
         </div>
         <div class="field">
-          <label for="workIssue">不足或失误（5~6月）</label>
+          <label for="workIssue">不足或失误（1~6月）</label>
           <textarea id="workIssue" placeholder="请填写不足、失误或复盘" required></textarea>
         </div>
         <div class="field">
@@ -395,7 +395,7 @@
         <span class="top-message" id="topMessage" aria-live="polite"></span>
       </div>
       <button class="secondary" type="button" id="clearBtn">清空内容</button>
-      <button type="button" id="copyBtn">生成并复制（飞书发送给江佳泽）</button>
+      <button type="button" id="copyBtn">生成并复制（飞书发送给糜凯）</button>
     </section>
 
     <section class="review-list" id="reviewList"></section>
@@ -551,8 +551,8 @@
       const selfLines = [
         "填写人和季度回顾",
         `姓名：${self.name}`,
-        `工作成效（5~6月）：${self.outcome}`,
-        `不足或失误（5~6月）：${self.issue}`,
+        `工作成效（1~6月）：${self.outcome}`,
+        `不足或失误（1~6月）：${self.issue}`,
         `7月的工作目标：${self.julyGoal}`
       ];
 
@@ -584,10 +584,10 @@
         return "请先填写你的姓名。";
       }
       if (self.outcome === "") {
-        return "请填写工作成效（5~6月）。";
+        return "请填写工作成效（1~6月）。";
       }
       if (self.issue === "") {
-        return "请填写不足或失误（5~6月）。";
+        return "请填写不足或失误（1~6月）。";
       }
       if (self.julyGoal === "") {
         return "请填写7月的工作目标。";
@@ -655,7 +655,7 @@
 
       try {
         await navigator.clipboard.writeText(output.textContent);
-        showMessage("已复制，可以直接粘贴到飞书发送给江佳泽。", "ok");
+        showMessage("已复制，可以直接粘贴到飞书发送给糜凯。", "ok");
       } catch {
         showMessage("浏览器未允许自动复制，请手动选中下方预览内容复制。", "error");
       }
